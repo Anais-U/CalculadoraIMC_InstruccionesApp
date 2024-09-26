@@ -97,3 +97,16 @@ fun ConfirmButtonAPD(onClick: () -> Unit) {
         Text("Agregar")
     }
 }
+
+@Composable
+fun ConfirmButtonCalc(onClick: () -> Unit) {
+    Button(
+        onClick = onClick,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Color(0xFFB388FF), // Color de fondo del botón
+            contentColor = Color.White    // Color del texto del botón
+        )
+    ) {
+        Text("Guardar")
+    }
+}

@@ -14,10 +14,13 @@ import androidx.compose.ui.Modifier
 import cl.bootcamp.calculadoraimc.components.ConfirmButtonAPD
 import cl.bootcamp.calculadoraimc.components.DismissButton
 import cl.bootcamp.calculadoraimc.model.Paciente
+import cl.bootcamp.calculadoraimc.viewmodel.PacienteViewModel
 
 @Composable
-fun AgregarPacienteDialog(onDismiss: () -> Unit, onAgregar: (Paciente) -> Unit) {
-    var nombre by remember { mutableStateOf("") }
+fun AgregarPacienteDialog(
+    viewModel: PacienteViewModel,
+    onDismiss: () -> Unit
+) { var nombre by remember { mutableStateOf("") }
 
     AlertDialog(
         onDismissRequest = { onDismiss() },
@@ -34,10 +37,13 @@ fun AgregarPacienteDialog(onDismiss: () -> Unit, onAgregar: (Paciente) -> Unit) 
         },
         confirmButton = {
             ConfirmButtonAPD(onClick = {
-                if (nombre.isNotEmpty()) {
-                    val paciente = Paciente(nombre = nombre)
-                    onAgregar(paciente)
-                }
+                val nuevoPaciente = Paciente(
+                    nombre = nombre,
+                imcCalculado = false
+                )
+                viewModel.agregarPaciente(nuevoPaciente)
+                onDismiss()
+
             })
 
 

@@ -20,21 +20,22 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import cl.bootcamp.calculadoraimc.components.CalcButton
 import cl.bootcamp.calculadoraimc.components.ConfirmButton
+import cl.bootcamp.calculadoraimc.components.ConfirmButtonCalc
 import cl.bootcamp.calculadoraimc.components.InputField
 import cl.bootcamp.calculadoraimc.components.MultiButtonSegmented
 import cl.bootcamp.calculadoraimc.viewmodel.PacienteViewModel
 
 @Composable
-fun CalculadoraIMC(nombrePaciente: String, navController: NavHostController, viewModel: PacienteViewModel = viewModel()) {
-    // Obtenemos los valores de nuestro PacienteViewModel
-    val gender = viewModel.gender.value
-    val age = viewModel.age.value
-    val height = viewModel.height.value
-    val weight = viewModel.weight.value
-    val imcResult = viewModel.imcResult.value
-    val showWarning = viewModel.showWarning.value
+fun CalculadoraIMC(nombrePaciente: String,
+    navController: NavHostController,
+    viewModel: PacienteViewModel = viewModel()
+) {
 
-    Column(
+    // Busca el paciente por su nombre
+    val paciente = viewModel.listaPacientes.value.find { it.nombre == nombrePaciente }
+
+    if (paciente != null) {
+        Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
@@ -51,7 +52,7 @@ fun CalculadoraIMC(nombrePaciente: String, navController: NavHostController, vie
         // MultiButton Segmentado para el género
         MultiButtonSegmented(
             options = listOf("Hombre", "Mujer"),
-            selectedOption = gender,
+            selectedOption = viewModel.gender.value,
             onOptionSelected = { viewModel.updateGender(it) }
         )
 
@@ -60,7 +61,7 @@ fun CalculadoraIMC(nombrePaciente: String, navController: NavHostController, vie
         // Input para Edad
         InputField(
             label = "Edad",
-            value = age,
+            value = viewModel.age.value,
             onValueChange = { viewModel.updateAge(it) },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
@@ -70,7 +71,7 @@ fun CalculadoraIMC(nombrePaciente: String, navController: NavHostController, vie
         // Input para Altura
         InputField(
             label = "Altura (cm)",
-            value = height,
+            value = viewModel.height.value,
             onValueChange = { viewModel.updateHeight(it) },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
@@ -80,7 +81,7 @@ fun CalculadoraIMC(nombrePaciente: String, navController: NavHostController, vie
         // Input para Peso
         InputField(
             label = "Peso (kg)",
-            value = weight,
+            value = viewModel.weight.value,
             onValueChange = { viewModel.updateWeight(it) },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
@@ -88,34 +89,62 @@ fun CalculadoraIMC(nombrePaciente: String, navController: NavHostController, vie
         Spacer(modifier = Modifier.height(16.dp))
 
         // Botón para calcular IMC
-        CalcButton(onClick = { viewModel.calcularIMC() })
+        CalcButton(onClick = { viewModel.calcularIMC(paciente)
+        })
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Mostrar el resultado del IMC
-        Text(text = imcResult, fontSize = 35.sp)
+        // Mostrar el IMC y el estado de salud si ha sido calculado
+        if (paciente.imcCalculado) {
+            Text(text = paciente.imc)
+            Text(text = "Estado de salud:${paciente.estadoSalud}")
 
-        // Mostrar advertencia si los datos son incorrectos
-        if (showWarning) {
-            AlertDialog(
-                onDismissRequest = { viewModel.dismissWarning() },
-                confirmButton = {
-                    ConfirmButton(onClick = { viewModel.dismissWarning() })
-                },
-                title = {
-                    Text(
-                        text = "¡Cuidado!",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 24.sp
+            Spacer(modifier = Modifier.height(16.dp))
+
+
+                ConfirmButtonCalc(onClick = {
+                    // Actualizar el paciente con los datos calculados
+                    val pacienteActualizado = paciente.copy(
+                        edad = viewModel.age.value,
+                        sexo = viewModel.gender.value,
+
+
                     )
-                },
-                text = {
-                    Text(
-                        text = "No olvides llenar todos los campos con datos correctos.",
-                        fontSize = 18.sp
+                    viewModel.actualizarPaciente(pacienteActualizado)
+                    navController.navigate("listaPacientes")
+                })
+
+            }
+        }
+
+                // Mostrar advertencia si los datos son incorrectos
+                if (viewModel.showWarning.value) {
+                    AlertDialog(
+                        onDismissRequest = { viewModel.dismissWarning() },
+                        confirmButton = {
+                            ConfirmButton(onClick = { viewModel.dismissWarning() })
+                        },
+                        title = {
+                            Text(
+                                text = "¡Cuidado!",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 24.sp
+                            )
+                        },
+                        text = {
+                            Text(
+                                text = "No olvides llenar todos los campos con datos correctos.",
+                                fontSize = 18.sp
+
+
+                            )
+                        }
                     )
                 }
-            )
+            }
         }
-    }
-}
+
+
+
+
+

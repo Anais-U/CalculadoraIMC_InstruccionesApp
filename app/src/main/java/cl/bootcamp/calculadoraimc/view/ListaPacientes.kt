@@ -32,47 +32,44 @@ fun ListaPacientes(navController: NavHostController, viewModel: PacienteViewMode
 
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text("Lista de Pacientes", color = Color.White) },
+            TopAppBar(
+                title = { Text("Lista de Pacientes", color = Color.White) },
                 colors = topAppBarColors(
                     containerColor = Color(0xFFB388FF),  // Fondo morado
                     titleContentColor = Color.White,      // Texto blanco
 
                 )
             )
-         },
+        },
         floatingActionButton = {
             CustomFloatingActionButton(
                 onClick = {
-                showDialog = true
+                    showDialog = true
                 }
             )
 
 
         },
-         content = { paddingValues ->
-             Column(
-                 modifier = Modifier
-                     .fillMaxSize()
-                     .padding(paddingValues)
-             ) {
-                 LazyColumn(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-                     items(pacientes) { paciente ->
-                         PacienteCard(paciente, navController)  // Pasa navController a PacienteCard
+        content = { paddingValues ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+            ) {
+                LazyColumn(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+                    items(pacientes, key = { paciente -> paciente.id }) { paciente ->
+                        PacienteCard(paciente, navController)  // Pasa navController a PacienteCard
 
-                     }
-                 }
-             }
-
-         }
-    )
-    // Mostrar el diálogo para agregar paciente cuando sea necesario
-    if (showDialog) {
-        AgregarPacienteDialog(
-            onDismiss = { showDialog = false },  // Cerrar el diálogo
-            onAgregar = { nuevoPaciente ->
-                viewModel.agregarPaciente(nuevoPaciente)
-                showDialog = false  // Cerrar el diálogo después de agregar
+                    }
+                }
             }
-        )
+
+        }
+    )
+
+    // Mostrar el diálogo para agregar paciente
+    if (showDialog) {
+        AgregarPacienteDialog(viewModel = viewModel, onDismiss = { showDialog = false })
     }
 }
+
